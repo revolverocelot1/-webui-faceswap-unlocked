@@ -12,14 +12,20 @@ if "TensorrtExecutionProvider" in providers:
     providers.remove("TensorrtExecutionProvider")
 
 
-def get_face_single(img_data, face_num=0):
+def get_face_single(img_data, face_num=0, det_size=(640, 640)):
     face_analyser = insightface.app.FaceAnalysis(name="buffalo_l", providers=providers)
-    face_analyser.prepare(ctx_id=0, det_size=(640, 640))
+    face_analyser.prepare(ctx_id=0, det_size=det_size)
     face = face_analyser.get(img_data)
+    
+    if len(face) == 0 and det_size != (320, 320):
+        det_size_half = (det_size[0] // 2, det_size[1] // 2)
+        return get_face_single(img_data, face_num=face_num, det_size=det_size_half)
+    
     try:
         return sorted(face, key=lambda x: x.bbox[0])[face_num]
     except IndexError:
         return None
+
 
 
 def swap_face(
