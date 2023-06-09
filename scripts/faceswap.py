@@ -39,7 +39,7 @@ class FaceSwapScript(scripts.Script):
                 )
                 models = get_models()
                 if(len(models) == 0) :
-                    logger.warning("You should at least have one model in models directory, please read the doc")                    
+                    logger.warning("You should at least have one model in models directory, please read the doc here : https://github.com/Ynn/sd-webui-faceswap/")                    
                     model = gr.inputs.Dropdown(choices=models, label="Model not found, please download one and reload automatic 1111")
 
                 else :
