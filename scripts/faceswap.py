@@ -12,7 +12,7 @@ from scripts.faceswap_version import version_flag
 
 class FaceSwapScript(scripts.Script):
     def title(self):
-        return f"Face Swap {version_flag}"
+        return f"FaceSwap"
 
     def show(self, is_img2img):
         return scripts.AlwaysVisible
