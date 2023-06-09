@@ -12,36 +12,36 @@ if "TensorrtExecutionProvider" in providers:
     providers.remove("TensorrtExecutionProvider")
 
 
-def get_face_single(img_data, face_num=0, det_size=(640, 640)):
+def get_face_single(img_data, face_index=0, det_size=(640, 640)):
     face_analyser = insightface.app.FaceAnalysis(name="buffalo_l", providers=providers)
     face_analyser.prepare(ctx_id=0, det_size=det_size)
     face = face_analyser.get(img_data)
     
     if len(face) == 0 and det_size != (320, 320):
         det_size_half = (det_size[0] // 2, det_size[1] // 2)
-        return get_face_single(img_data, face_num=face_num, det_size=det_size_half)
+        return get_face_single(img_data, face_index=face_index, det_size=det_size_half)
     
     try:
-        return sorted(face, key=lambda x: x.bbox[0])[face_num]
+        return sorted(face, key=lambda x: x.bbox[0])[face_index]
     except IndexError:
         return None
 
 
 
 def swap_face(
-    source_img : Image, target_img : Image, model : str ="../models/inswapper_128.onnx", face_nums : List[int]=[0]
+    source_img : Image, target_img : Image, model : str ="../models/inswapper_128.onnx", faces_index : List[int]=[0]
 ) -> Image:
     source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
     target_img = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
-    source_face = get_face_single(source_img, face_num=0)
+    source_face = get_face_single(source_img, face_index=0)
     if source_face is not None:
         result = target_img
         model_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), model)
         face_swapper = insightface.model_zoo.get_model(
             model_path, providers=providers
         )
-        for face_num in face_nums :
-            target_face = get_face_single(target_img, face_num=face_num)
+        for face_num in faces_index :
+            target_face = get_face_single(target_img, face_index=face_num)
             if target_face is not None:
                 result = face_swapper.get(
                     result, target_face, source_face, paste_back=True
