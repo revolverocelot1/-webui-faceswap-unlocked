@@ -4,8 +4,14 @@ import cv2
 import insightface
 import onnxruntime
 import numpy as np
+
 from PIL import Image, ImageFont, ImageDraw, PngImagePlugin
 from scripts.faceswap_logging import logger
+from modules.upscaler import Upscaler, UpscalerData
+from modules.face_restoration import restore_faces
+from modules import scripts, shared, images,  scripts_postprocessing
+
+
 
 providers = onnxruntime.get_available_providers()
 if "TensorrtExecutionProvider" in providers:
@@ -17,7 +23,7 @@ def get_face_single(img_data, face_index=0, det_size=(640, 640)):
     face_analyser.prepare(ctx_id=0, det_size=det_size)
     face = face_analyser.get(img_data)
     
-    if len(face) == 0 and det_size != (320, 320):
+    if len(face) == 0 and det_size[0] > 320 and det_size[1] > 320:
         det_size_half = (det_size[0] // 2, det_size[1] // 2)
         return get_face_single(img_data, face_index=face_index, det_size=det_size_half)
     
@@ -29,7 +35,7 @@ def get_face_single(img_data, face_index=0, det_size=(640, 640)):
 
 
 def swap_face(
-    source_img : Image, target_img : Image, model : str ="../models/inswapper_128.onnx", faces_index : List[int]=[0]
+    source_img : Image, target_img : Image, model : str ="../models/inswapper_128.onnx", faces_index : List[int]=[0], upscaler : UpscalerData = None
 ) -> Image:
     source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
     target_img = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
@@ -50,7 +56,15 @@ def swap_face(
                 logger.info(f"No target face found")
 
         numpy_image = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
-        return Image.fromarray(numpy_image)
+        result_image = Image.fromarray(numpy_image)
+
+        if not upscaler == None :
+            numpy_image = shared.face_restorers[0].restore(numpy_image)
+            result_image = Image.fromarray(numpy_image)
+            result_image = upscaler.scaler.upscale(result_image,1, upscaler.data_path)
+            logger.info("Upscale result image with %s", upscaler.name)
+        
+        return result_image
     else:
         logger.info(f"No source face found")
 

@@ -6,6 +6,14 @@ import traceback
 
 req_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "requirements.txt")
 
+import os
+
+models_dir = os.path.abspath('models/FaceSwap')
+
+if not os.path.exists(models_dir):
+    os.makedirs(models_dir)
+    print(f"FaceSwap : You can put the model in {models_dir} directory")
+
 print("Check FaceSwap requirements")
 with open(req_file) as file:
     for package in file:

@@ -15,9 +15,12 @@ To ensure compatibility, this extension currently runs only on CPU. However, it 
 To install the extension, follow these steps:
 
 + Clone the repository to your automatic 1111 extensions directory.
-+ Download the pre-trained model used by "Roop" and place it in the models directory of this extension. The model file required is "inswapper_128.onnx".Mirrors are given the roop project [installation guide](https://github.com/s0md3v/roop/wiki/1.-Installation).
++ Download the pre-trained model used by "Roop" and place it in the models directory of this extension (/stable-diffusion-webui/extensions/sd-webui-faceswap/models/ or /stable-diffusion-webui/models/FaceSwap). The model file required is "inswapper_128.onnx".Mirrors are given the roop project [installation guide](https://github.com/s0md3v/roop/wiki/1.-Installation).
 
 On Windows, Microsoft Visual C++ 14.0 or greater is required. [During the install, make sure to include the Python and C++ packages.](https://github.com/s0md3v/roop/issues/153)
+
+The inswapper_128.onnx model I use has the following sha1sum : 17a64851eaefd55ea597ee41e5c18409754244c5
+
 
 # Usage
 
