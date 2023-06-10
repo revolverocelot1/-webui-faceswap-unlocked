@@ -33,9 +33,25 @@ def get_face_single(img_data, face_index=0, det_size=(640, 640)):
         return None
 
 
+# def upscale_image(image: Image, upscaler: UpscalerData):
+#     numpy_image = np.array(image)
+#     numpy_image = shared.face_restorers[0].restore(numpy_image)
+#     result_image = Image.fromarray(numpy_image)
+#     result_image = upscaler.scaler.upscale(result_image, 1, upscaler.data_path)
+#     logger.info("Upscale result image with %s", upscaler.name)
+#     return result_image
+
+def upscale_image(image: Image, upscaler: UpscalerData):
+    result_image = upscaler.scaler.upscale(image, 1, upscaler.data_path)
+    numpy_image = np.array(result_image)
+    numpy_image = shared.face_restorers[0].restore(numpy_image)
+    result_image = Image.fromarray(numpy_image)
+    logger.info("Upscale and restore face in result image with %s and %s", upscaler.name, shared.face_restorers[0].name())
+    return result_image
+
 
 def swap_face(
-    source_img : Image, target_img : Image, model : str ="../models/inswapper_128.onnx", faces_index : List[int]=[0], upscaler : UpscalerData = None
+    source_img: Image, target_img: Image, model: str = "../models/inswapper_128.onnx", faces_index: List[int] = [0], upscaler: UpscalerData = None
 ) -> Image:
     source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
     target_img = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
@@ -46,7 +62,7 @@ def swap_face(
         face_swapper = insightface.model_zoo.get_model(
             model_path, providers=providers
         )
-        for face_num in faces_index :
+        for face_num in faces_index:
             target_face = get_face_single(target_img, face_index=face_num)
             if target_face is not None:
                 result = face_swapper.get(
@@ -55,14 +71,10 @@ def swap_face(
             else:
                 logger.info(f"No target face found")
 
-        numpy_image = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
-        result_image = Image.fromarray(numpy_image)
+        result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
 
-        if not upscaler == None :
-            numpy_image = shared.face_restorers[0].restore(numpy_image)
-            result_image = Image.fromarray(numpy_image)
-            result_image = upscaler.scaler.upscale(result_image,1, upscaler.data_path)
-            logger.info("Upscale result image with %s", upscaler.name)
+        if upscaler is not None:
+            result_image = upscale_image(result_image, upscaler)
         
         return result_image
     else:

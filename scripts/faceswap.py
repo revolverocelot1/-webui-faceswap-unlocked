@@ -39,7 +39,7 @@ class FaceSwapScript(scripts.Script):
                     placeholder="Which face to swap (comma separated), start from 0",
                     label="Comma separated face number(s)",
                 )
-                upscaler_name = gr.inputs.Dropdown(choices=[upscaler.name for upscaler in shared.sd_upscalers], label="Upscaler used to improve result")
+                upscaler_name = gr.inputs.Dropdown(choices=[upscaler.name for upscaler in shared.sd_upscalers], label="Use given Upscaler (scale 1) and Codeformer")
                 
                 
                 models = get_models()
