@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import os
 from typing import List
 import cv2
@@ -10,7 +11,35 @@ from scripts.faceswap_logging import logger
 from modules.upscaler import Upscaler, UpscalerData
 from modules.face_restoration import restore_faces
 from modules import scripts, shared, images,  scripts_postprocessing
+from modules.face_restoration import FaceRestoration
 
+@dataclass
+class UpscaleOptions :
+    scale : int = 1
+    upscaler : UpscalerData = None
+    upscale_visibility : float = 0.5
+    face_restorer : FaceRestoration  = None
+    restorer_visibility : float = 0.5
+
+def upscale_image(image: Image, upscale_options: UpscaleOptions):
+    result_image = image
+    
+    if(upscale_options.upscaler is not None and upscale_options.upscaler.name is not "None") :
+        original_image = result_image.copy()
+        logger.info("Upscale with %s scale = %s", upscale_options.upscaler.name, upscale_options.scale)
+        result_image = upscale_options.upscaler.scaler.upscale(image, upscale_options.scale, upscale_options.upscaler.data_path)
+        if upscale_options.scale == 1 :
+            result_image = Image.blend(original_image, result_image, upscale_options.upscale_visibility)
+
+    if(upscale_options.face_restorer is not None) :
+        original_image = result_image.copy()
+        logger.info("Restore face with %s", upscale_options.face_restorer.name())
+        numpy_image = np.array(result_image)
+        numpy_image = upscale_options.face_restorer.restore(numpy_image)
+        restored_image = Image.fromarray(numpy_image)
+        result_image = Image.blend(original_image, restored_image, upscale_options.restorer_visibility)
+
+    return result_image
 
 
 providers = onnxruntime.get_available_providers()
@@ -32,17 +61,11 @@ def get_face_single(img_data, face_index=0, det_size=(640, 640)):
     except IndexError:
         return None
 
-def upscale_image(image: Image, upscaler: UpscalerData):
-    result_image = upscaler.scaler.upscale(image, 1, upscaler.data_path)
-    numpy_image = np.array(result_image)
-    numpy_image = shared.face_restorers[0].restore(numpy_image)
-    result_image = Image.fromarray(numpy_image)
-    logger.info("Upscale and restore face in result image with %s and %s", upscaler.name, shared.face_restorers[0].name())
-    return result_image
+
 
 
 def swap_face(
-    source_img: Image, target_img: Image, model: str = "../models/inswapper_128.onnx", faces_index: List[int] = [0], upscaler: UpscalerData = None
+    source_img: Image, target_img: Image, model: str = "../models/inswapper_128.onnx", faces_index: List[int] = [0], upscale_options: UpscaleOptions = None
 ) -> Image:
     source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
     target_img = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
@@ -64,8 +87,7 @@ def swap_face(
 
         result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
 
-        if upscaler is not None:
-            result_image = upscale_image(result_image, upscaler)
+        result_image = upscale_image(result_image, upscale_options)
         
         return result_image
     else:

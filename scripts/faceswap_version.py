@@ -1,4 +1,4 @@
-version_flag = "v0.0.4"
+version_flag = "v0.0.5"
 
 from scripts.faceswap_logging import logger
 

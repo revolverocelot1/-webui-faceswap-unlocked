@@ -1,3 +1,8 @@
+
+0.0.5 :
+
++ add options for face restoration and upscaling. Not to sure about the reliability of visibility factor. Keep it to 1 if any doubt.
+
 0.0.4 :
 
 + add upscaler option (does not as well as extra tab - will investigate)

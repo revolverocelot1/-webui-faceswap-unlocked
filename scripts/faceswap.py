@@ -6,9 +6,10 @@ from modules.processing import StableDiffusionProcessing, StableDiffusionProcess
 from modules.shared import cmd_opts, opts, state
 from PIL import Image
 import glob
+from modules.face_restoration import FaceRestoration
 
 from scripts.faceswap_logging import logger
-from scripts.swapper import swap_face
+from scripts.swapper import UpscaleOptions, swap_face
 from scripts.faceswap_version import version_flag
 import os
 
@@ -39,8 +40,13 @@ class FaceSwapScript(scripts.Script):
                     placeholder="Which face to swap (comma separated), start from 0",
                     label="Comma separated face number(s)",
                 )
-                upscaler_name = gr.inputs.Dropdown(choices=[upscaler.name for upscaler in shared.sd_upscalers], label="Use given Upscaler (scale 1) and Codeformer")
-                
+                with gr.Row():
+                    face_restorer_name = gr.Radio(label='Restore Face', choices=["None"]+[x.name() for x in shared.face_restorers],
+                                    value=shared.face_restorers[0].name(), type="value")
+                    face_restorer_visibility = gr.Slider(0,1,1, step=0.1, label="Restore visibility")
+                upscaler_name = gr.inputs.Dropdown(choices=[upscaler.name for upscaler in shared.sd_upscalers], label="Upscaler")
+                upscaler_scale = gr.Slider(1,8,1, step=0.1, label="Upscaler scale")
+                upscaler_visibility = gr.Slider(0,1,1, step=0.1, label="Upscaler visibility (if scale = 1)")
                 
                 models = get_models()
                 if(len(models) == 0) :
@@ -57,7 +63,7 @@ class FaceSwapScript(scripts.Script):
                     True, placeholder="Swap face in generated image", label="Swap in generated image", visible=is_img2img
                 )
 
-        return [img, enable, faces_index, model, upscaler_name, swap_in_source, swap_in_generated]
+        return [img, enable, faces_index, model, face_restorer_name,face_restorer_visibility, upscaler_name, upscaler_scale, upscaler_visibility, swap_in_source, swap_in_generated]
 
     @property
     def upscaler(self) -> UpscalerData :
@@ -66,9 +72,24 @@ class FaceSwapScript(scripts.Script):
                 return upscaler
         return None
 
+    @property
+    def face_restorer(self) -> FaceRestoration :
+        for face_restorer in shared.face_restorers :
+            if face_restorer.name() == self.face_restorer_name :
+                return face_restorer
+        return None 
 
-    def process(self, p: StableDiffusionProcessing, img, enable, faces_index, model,upscaler_name, swap_in_source, swap_in_generated):
+    @property
+    def upscale_options(self) -> UpscaleOptions :
+        return UpscaleOptions(scale = self.upscaler_scale, upscaler= self.upscaler, face_restorer=self.face_restorer, upscale_visibility = self.upscaler_visibility, restorer_visibility=self.face_restorer_visibility)
+
+
+    def process(self, p: StableDiffusionProcessing, img, enable, faces_index, model, face_restorer_name,face_restorer_visibility,  upscaler_name, upscaler_scale, upscaler_visibility, swap_in_source, swap_in_generated):
         self.source = img
+        self.face_restorer_name = face_restorer_name
+        self.upscaler_scale = upscaler_scale
+        self.upscaler_visibility = upscaler_visibility
+        self.face_restorer_visibility = face_restorer_visibility
         self.enable = enable
         self.upscaler_name = upscaler_name
         self.swap_in_generated = swap_in_generated
@@ -79,10 +100,12 @@ class FaceSwapScript(scripts.Script):
         if self.enable:
             if self.source is not None:
                 if isinstance(p,StableDiffusionProcessingImg2Img) and swap_in_source:
-                    for i in range(len(p.init_images)) :
-                        p.init_images[i] = swap_face(self.source, p.init_images[i], faces_index = self.faces_index, model=self.model, upscaler=self.upscaler)
+                    logger.info(f"FaceSwap enabled, face index %s", self.faces_index)
 
-                logger.info(f"FaceSwap enabled, face index %s", self.faces_index)
+                    for i in range(len(p.init_images)) :
+                        logger.info(f"Swap in source %s", i)
+                        p.init_images[i] = swap_face(self.source, p.init_images[i], faces_index = self.faces_index, model=self.model, upscale_options=self.upscale_options)
+
             else :
                 logger.error(f"Please provide a source face")
 
@@ -90,7 +113,7 @@ class FaceSwapScript(scripts.Script):
         if self.enable and self.swap_in_generated:
             if self.source is not None:
                 image: Image.Image = script_pp.image
-                result = swap_face(self.source, image, faces_index = self.faces_index, model=self.model, upscaler=self.upscaler)
+                result = swap_face(self.source, image, faces_index = self.faces_index, model=self.model, upscale_options=self.upscale_options)
                 pp = scripts_postprocessing.PostprocessedImage(result)
                 pp.info = {}
                 p.extra_generation_params.update(pp.info)
