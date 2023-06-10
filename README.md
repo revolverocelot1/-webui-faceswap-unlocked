@@ -42,3 +42,8 @@ You can choose to activate the swap on the source image or on the generated imag
 
 Inpainting should work but only the masked part will be swapped.
 
+
+## Credits
+
++ The developers of roop for their great work.
++ deepinsight for their insightface project, which offers a well-crafted library and models that have greatly enhanced the capabilities of this project.
