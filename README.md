@@ -8,7 +8,11 @@ To ensure compatibility, this extension currently runs only on CPU. However, it 
 
 ![example](example/example.png)
 
-**Ethical viewpoint :** The primary purpose of this extension is to facilitate consistency in generated images by enabling face swapping. It is important to note that this extension does not implement censorship features. While censorship mechanisms can be implemented (as does roop), they are inherently vulnerable to bypass when users have access to the source code. Therefore, it is crucial to use this extension responsibly and refrain from utilizing it for malicious purposes. We strongly emphasize the ethical use of this extension. Please respect the privacy and consent of individuals when swapping faces in images. Do not engage in activities that may cause harm, violate privacy rights, or infringe upon the well-being of others. 
+**Ethical viewpoint :** The primary goal of this extension is to ensure consistency in generated images through the capability of face swapping. It is essential to clarify that this extension does not incorporate censorship functionalities. Although censorship mechanisms can be implemented (as demonstrated by roop), they inherently remain vulnerable to bypassing when users have access to the source code. Consequently, it is crucial to exercise responsible usage of this extension and abstain from employing it for malicious purposes. We strongly emphasize the ethical application of this tool, urging respect for the privacy and consent of individuals when swapping faces in images. Engaging in activities that may cause harm, violate privacy rights, or infringe upon the well-being of others is strictly discouraged.
+
+Furthermore, it is equally important to raise awareness among the general public about the existence of such tools and the ease with which deepfakes can be generated. As the technology advances, it becomes increasingly crucial for individuals to exercise critical thinking and skepticism when encountering media content. By fostering a culture of media literacy, we can collectively mitigate the potential negative impacts associated with the misuse of these tools and promote responsible use in the digital realm.
+
+**In the event of violation of the legal and ethical requirements of the user's country or region, this code repository is exempt from liability**
 
 ## Install
 
@@ -22,7 +26,7 @@ On Windows, Microsoft Visual C++ 14.0 or greater is required. [During the instal
 The inswapper_128.onnx model I use has the following sha1sum : 17a64851eaefd55ea597ee41e5c18409754244c5
 
 
-# Usage
+## Usage
 
 To use the FaceSwap extension, follow these instructions:
 
@@ -30,6 +34,11 @@ To use the FaceSwap extension, follow these instructions:
 2. Click on the "Activate" before generate.
 3. Optionally, select the face number you wish to swap (from right to left) if multiple faces are detected in the image.
 4. The resulting swapped face will be displayed.
-5. If the quality is not satisfactory (and it is often quite average), you can try using the "Restore Face" feature or explore additional options in the "Extra" tab for further improvement.
+5. If the quality is not satisfactory (and it is often quite average), you can try using the "Restore Face" feature or explore additional options in the "Extra" tab for further improvement. You can also select an upscaler from the menu. This will activate CodeFormer and the chosen upscaler (scale=1). The result may be satisfactory, but gives less control than the extra tab.
 
-Img2Img should work but only the masked part will be swapped.
+### Img2Img :
+
+You can choose to activate the swap on the source image or on the generated image, or on both. Activate on source image allows you to start from a given base and apply the diffusion process to it.
+
+Inpainting should work but only the masked part will be swapped.
+
