@@ -25,6 +25,7 @@ On Windows, Microsoft Visual C++ 14.0 or greater is required. [During the instal
 
 The inswapper_128.onnx model I use has the following sha1sum : 17a64851eaefd55ea597ee41e5c18409754244c5
 
+Use of the templates must comply with the terms of the license (see insightface repository). No model will be directly provided or hosted here.
 
 ## Usage
 
