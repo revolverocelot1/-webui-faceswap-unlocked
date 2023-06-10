@@ -1,3 +1,8 @@
+0.0.4 :
+
++ add upscaler option (does not as well as extra tab - will investigate)
++ add a models/FaceWap dir in sd
+
 0.0.3 : 
 
 + Add options to select when swapping occur in img2img (before/after generation or both) 
