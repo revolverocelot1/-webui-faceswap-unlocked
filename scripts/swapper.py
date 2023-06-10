@@ -32,15 +32,6 @@ def get_face_single(img_data, face_index=0, det_size=(640, 640)):
     except IndexError:
         return None
 
-
-# def upscale_image(image: Image, upscaler: UpscalerData):
-#     numpy_image = np.array(image)
-#     numpy_image = shared.face_restorers[0].restore(numpy_image)
-#     result_image = Image.fromarray(numpy_image)
-#     result_image = upscaler.scaler.upscale(result_image, 1, upscaler.data_path)
-#     logger.info("Upscale result image with %s", upscaler.name)
-#     return result_image
-
 def upscale_image(image: Image, upscaler: UpscalerData):
     result_image = upscaler.scaler.upscale(image, 1, upscaler.data_path)
     numpy_image = np.array(result_image)
