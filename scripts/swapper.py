@@ -24,7 +24,7 @@ class UpscaleOptions :
 def upscale_image(image: Image, upscale_options: UpscaleOptions):
     result_image = image
     
-    if(upscale_options.upscaler is not None and upscale_options.upscaler.name is not "None") :
+    if(upscale_options.upscaler is not None and upscale_options.upscaler.name != "None") :
         original_image = result_image.copy()
         logger.info("Upscale with %s scale = %s", upscale_options.upscaler.name, upscale_options.scale)
         result_image = upscale_options.upscaler.scaler.upscale(image, upscale_options.scale, upscale_options.upscaler.data_path)
