@@ -10,28 +10,28 @@ from PIL import Image, ImageFont, ImageDraw, PngImagePlugin
 from scripts.faceswap_logging import logger
 from modules.upscaler import Upscaler, UpscalerData
 from modules.face_restoration import restore_faces
-from modules import scripts, shared, images,  scripts_postprocessing
+from modules import scripts, shared, images, scripts_postprocessing
 from modules.face_restoration import FaceRestoration
 
 @dataclass
-class UpscaleOptions :
-    scale : int = 1
-    upscaler : UpscalerData = None
-    upscale_visibility : float = 0.5
-    face_restorer : FaceRestoration  = None
-    restorer_visibility : float = 0.5
+class UpscaleOptions:
+    scale: int = 1
+    upscaler: UpscalerData = None
+    upscale_visibility: float = 0.5
+    face_restorer: FaceRestoration = None
+    restorer_visibility: float = 0.5
 
 def upscale_image(image: Image, upscale_options: UpscaleOptions):
     result_image = image
-    
-    if(upscale_options.upscaler is not None and upscale_options.upscaler.name != "None") :
+
+    if (upscale_options.upscaler is not None and upscale_options.upscaler.name != "None"):
         original_image = result_image.copy()
         logger.info("Upscale with %s scale = %s", upscale_options.upscaler.name, upscale_options.scale)
         result_image = upscale_options.upscaler.scaler.upscale(image, upscale_options.scale, upscale_options.upscaler.data_path)
         if upscale_options.scale == 1 :
             result_image = Image.blend(original_image, result_image, upscale_options.upscale_visibility)
 
-    if(upscale_options.face_restorer is not None) :
+    if (upscale_options.face_restorer is not None):
         original_image = result_image.copy()
         logger.info("Restore face with %s", upscale_options.face_restorer.name())
         numpy_image = np.array(result_image)
@@ -46,22 +46,28 @@ providers = onnxruntime.get_available_providers()
 if "TensorrtExecutionProvider" in providers:
     providers.remove("TensorrtExecutionProvider")
 
+face_analyser = None
+
 
 def get_face_single(img_data, face_index=0, det_size=(640, 640)):
-    face_analyser = insightface.app.FaceAnalysis(name="buffalo_l", providers=providers)
+    global face_analyser
+    if face_analyser is None:
+        face_analyser = insightface.app.FaceAnalysis(name="buffalo_l", providers=providers)
     face_analyser.prepare(ctx_id=0, det_size=det_size)
     face = face_analyser.get(img_data)
-    
+
     if len(face) == 0 and det_size[0] > 320 and det_size[1] > 320:
         det_size_half = (det_size[0] // 2, det_size[1] // 2)
         return get_face_single(img_data, face_index=face_index, det_size=det_size_half)
-    
+
+    if shared.cmd_opts.lowvram or shared.cmd_opts.lowram:
+        # free up memory
+        face_analyser = None
+
     try:
         return sorted(face, key=lambda x: x.bbox[0])[face_index]
     except IndexError:
         return None
-
-
 
 
 def swap_face(
@@ -88,7 +94,7 @@ def swap_face(
         result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
 
         result_image = upscale_image(result_image, upscale_options)
-        
+
         return result_image
     else:
         logger.info(f"No source face found")
