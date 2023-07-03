@@ -8,7 +8,8 @@ To ensure compatibility, this extension currently runs only on CPU. However, it 
 
 ![example](example/example.png)
 
-**Ethical viewpoint :** The primary goal of this extension is to ensure consistency in generated images through the capability of face swapping. It is essential to clarify that this extension does not incorporate censorship functionalities. Although censorship mechanisms can be implemented (as demonstrated by roop), they inherently remain vulnerable to bypassing when users have access to the source code. Consequently, it is crucial to exercise responsible usage of this extension and abstain from employing it for malicious purposes. We strongly emphasize the ethical application of this tool, urging respect for the privacy and consent of individuals when swapping faces in images. **Engaging in activities that may cause harm, violate privacy rights, or infringe upon the well-being of others is strictly discouraged.**
+**Ethical viewpoint :** The primary goal of this extension is to ensure consistency in generated images through the capability of face swapping. It is essential to clarify that this extension does not incorporate censorship functionalities. Although censorship mechanisms can be implemented (as demonstrated by roop), they inherently remain vulnerable to bypassing when users have access to the source code. Consequently, i dont care what you use it for okay?
+
 
 Furthermore, it is equally important to raise awareness among the general public about the existence of such tools and the ease with which deepfakes can be generated. As the technology advances, it becomes increasingly crucial for individuals to exercise critical thinking and skepticism when encountering media content. By fostering a culture of media literacy, we can collectively mitigate the potential negative impacts associated with the misuse of these tools and promote responsible use in the digital realm.
 
